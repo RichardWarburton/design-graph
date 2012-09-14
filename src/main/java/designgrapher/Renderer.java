@@ -1,8 +1,7 @@
-package designgrapher.rendering;
+package designgrapher;
 
 import java.io.File;
 
-import designgrapher.ClassHierachy;
 
 public interface Renderer {
 

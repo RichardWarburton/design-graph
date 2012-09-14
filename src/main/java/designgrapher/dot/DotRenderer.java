@@ -1,4 +1,4 @@
-package designgrapher.rendering;
+package designgrapher.dot;
 
 import static com.google.common.collect.Collections2.transform;
 
@@ -7,23 +7,18 @@ import java.io.IOException;
 import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Comparator;
 import java.util.List;
 import java.util.Map.Entry;
 import java.util.Set;
 import java.util.SortedMap;
 import java.util.SortedSet;
-import java.util.TreeMap;
-import java.util.TreeSet;
 
 import org.objectweb.asm.Type;
 import org.objectweb.asm.tree.AbstractInsnNode;
 import org.objectweb.asm.tree.ClassNode;
-import org.objectweb.asm.tree.FieldInsnNode;
 import org.objectweb.asm.tree.LdcInsnNode;
 import org.objectweb.asm.tree.MethodInsnNode;
 import org.objectweb.asm.tree.MethodNode;
-import org.objectweb.asm.tree.TypeInsnNode;
 import org.stringtemplate.v4.ST;
 
 import com.google.common.base.Function;
@@ -35,6 +30,7 @@ import com.google.common.collect.Sets;
 import com.google.common.io.Files;
 
 import designgrapher.ClassHierachy;
+import designgrapher.Renderer;
 
 
 // TODO: refactor this class entirely and model rendering properly
@@ -46,25 +42,14 @@ public class DotRenderer implements Renderer {
 	@Override
 	public void render(final File toFile, final ClassHierachy hierachy) {
 		this.hierachy = hierachy;
-		final SortedMap<String, SortedSet<ClassNode>> packageLookup = makeSortedPackageLookup(hierachy);
-		final Collection<String> packages = transform(packageLookup.entrySet(), makePackage);
-		final Collection<String> relationShips = renderRelationShips(packageLookup);
+		final Collection<String> packages = transform(hierachy.classesByPackageSorted.entrySet(), makePackage);
+		final Collection<String> relationShips = renderRelationShips(hierachy.classesByPackageSorted);
 		final String entireGraph = renderGraph(Iterables.concat(packages, relationShips));
 		try {
 			Files.write(entireGraph, toFile, Charset.defaultCharset());
 		} catch (final IOException e) {
 			throw new RuntimeException(e);
 		}
-	}
-
-	private SortedMap<String, SortedSet<ClassNode>> makeSortedPackageLookup(final ClassHierachy hierachy) {
-		final SortedMap<String, SortedSet<ClassNode>> sorted = new TreeMap<>();
-		for (final Entry<String, Collection<ClassNode>> e : hierachy.classesByPackage.asMap().entrySet()) {
-			final SortedSet<ClassNode> nodes = new TreeSet<>(compareClassByName);
-			nodes.addAll(e.getValue());
-			sorted.put(e.getKey(), nodes);
-		}
-		return sorted;
 	}
 
 	private Collection<String> renderRelationShips(final SortedMap<String, SortedSet<ClassNode>> sortedClasses) {
@@ -233,13 +218,6 @@ public class DotRenderer implements Renderer {
 				classString.append(classNode.render());
 			}
 			return classString.toString();
-		}
-	};
-
-	private final Comparator<ClassNode> compareClassByName = new Comparator<ClassNode>() {
-		@Override
-		public int compare(final ClassNode left, final ClassNode right) {
-			return left.name.compareTo(right.name);
 		}
 	};
 	

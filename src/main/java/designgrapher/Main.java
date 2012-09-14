@@ -5,8 +5,7 @@ import java.io.FileFilter;
 import java.util.ArrayList;
 import java.util.List;
 
-import designgrapher.rendering.DotRenderer;
-import designgrapher.rendering.Renderer;
+import designgrapher.dot.DotRenderer;
 
 public class Main {
 
