@@ -24,8 +24,15 @@ public class ClassHierachyAnalysis {
 	public void addAllClasses(final List<File> classFiles) {
 		for (final File classFile : classFiles) {
 			final ClassNode node = loadClass(classFile);
-			classesByName.put(node.name, node);
+			if (!isInnerClass(node)) {
+				classesByName.put(node.name, node);
+			}
 		}
+	}
+
+	private boolean isInnerClass(ClassNode node) {
+		// TODO; strengthen this 
+		return node.name.contains("$");
 	}
 
 	private ClassNode loadClass(final File classFile) {
