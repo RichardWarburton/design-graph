@@ -4,14 +4,15 @@ import java.util.Collection;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.SortedMap;
 import java.util.SortedSet;
 import java.util.TreeMap;
 import java.util.TreeSet;
-import java.util.Map.Entry;
 
 import org.objectweb.asm.tree.ClassNode;
 
+import com.google.common.base.Predicate;
 import com.google.common.collect.HashMultimap;
 import com.google.common.collect.Multimap;
 
@@ -41,6 +42,40 @@ public class ClassHierachy {
 			nodes.addAll(e.getValue());
 			classesByPackageSorted.put(e.getKey(), nodes);
 		}
+	}
+	
+	
+	public ClassIdentifier findByName(final String toFind) {
+		return find(new Predicate<ClassNode>() {
+			@Override
+			public boolean apply(ClassNode input) {
+				return input.name.equals(toFind);
+			}
+		});
+	}
+	
+	public ClassIdentifier findByNode(final ClassNode toFind) {
+		return find(new Predicate<ClassNode>() {
+			@Override
+			public boolean apply(ClassNode input) {
+				return input == toFind;
+			}
+		});
+	}
+
+	private ClassIdentifier find(final Predicate<ClassNode> toFind) {
+		int packageIndex = 0;
+		for (final SortedSet<ClassNode> pkg : classesByPackageSorted.values()) {
+			int classIndex = 0;
+			for (final ClassNode cls : pkg) {
+				if (toFind.apply(cls)) {
+					return new ClassIdentifier(packageIndex, classIndex);
+				}
+				classIndex++;
+			}
+			packageIndex++;
+		}
+		return new ClassIdentifier();
 	}
 
 }

@@ -5,7 +5,6 @@ import java.io.FileFilter;
 import java.util.ArrayList;
 import java.util.List;
 
-import designgrapher.dot.DotRenderer;
 
 public class Main {
 
@@ -15,7 +14,7 @@ public class Main {
 		analysis.addAllClasses(classFiles);
 		analysis.analyse();
 
-		final Renderer renderer = new DotRenderer();
+		final DotRenderer renderer = new DotRenderer();
 		renderer.render(new File("output.dot"), analysis.getClassHierachy());
 	}
 
